@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Higher-Order Pruner: curvature-guided unstructured pruning for PyTorch.">
+  <title>Higher-Order Pruner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bar">
+    <a href="#top" class="brand">Higher-Order Pruner</a>
+    <nav aria-label="On this page"><a href="#method">Method</a><a href="#results">Results</a><a href="#quickstart">Quickstart</a></nav>
+  </header>
+  <main id="top">
+    <section class="hero" aria-labelledby="title">
+      <h1 id="title" class="sr-only">Higher-Order Pruner</h1>
+      <img src="images/01-hero.png" width="1774" height="887" alt="Prune weights. Keep the shape. A dense weight grid becomes sparse while keeping its dimensions.">
+      <p>Unstructured pruning for PyTorch using a diagonal curvature estimate and a cubic correction.</p>
+      <a class="button" href="#quickstart">Get started</a>
+    </section>
+    <section id="method">
+      <p class="kicker">01 / Method</p>
+      <h2>From dense weights to a fixed sparse mask</h2>
+      <p>Use representative data to score selected linear weights. Prune to the requested sparsity, then try to refine the surviving weights without regrowing the pruned ones.</p>
+      <figure><a href="images/01-how-it-works.png"><img loading="lazy" src="images/01-how-it-works.png" width="1536" height="1024" alt="Workflow: calibrate on representative data, score with curvature and a cubic correction, then prune and refine."></a><figcaption>The pruning workflow.</figcaption></figure>
+      <div class="grid">
+        <figure><a href="images/02-cubic-correction.png"><img loading="lazy" src="images/02-cubic-correction.png" width="1536" height="1024" alt="Illustration: two equal second-order scores separate after the cubic correction."></a><figcaption>The cubic correction can break a tie in second-order scores.</figcaption></figure>
+        <figure><a href="images/03-fixed-mask-refinement.png"><img loading="lazy" src="images/03-fixed-mask-refinement.png" width="1536" height="1024" alt="Fixed-mask refinement: keep pruned weights at zero and retain trial updates only if validation loss stays within tolerance."></a><figcaption>Refinement changes surviving weights while keeping the mask fixed.</figcaption></figure>
+      </div>
+    </section>
+    <section id="results">
+      <p class="kicker">02 / Results</p>
+      <h2>Qwen3-4B-Base at 30%, 50%, and 70% sparsity</h2>
+      <p>In these notebook runs, higher-order pruning leads the five-method accuracy comparison at 50% sparsity. It also has the lowest reported WikiText-2 word perplexity at 50%. The second-order method leads both comparisons at 70%.</p>
+      <div class="grid">
+        <figure><a href="images/04-qwen-accuracy.png"><img loading="lazy" src="images/04-qwen-accuracy.png" width="1536" height="1024" alt="Mean accuracy across six tasks. Higher-order scores 65.76, 60.90 and 41.46 percent at 30, 50 and 70 percent sparsity."></a><figcaption>Mean accuracy across six tasks. Higher is better.</figcaption></figure>
+        <figure><a href="images/05-qwen-perplexity-matched.png"><img loading="lazy" src="images/05-qwen-perplexity-matched.png" width="1536" height="1024" alt="WikiText-2 word perplexity. Higher-order scores 12.129, 15.916 and 85.140 at 30, 50 and 70 percent sparsity. Wanda and SparseGPT are not reported."></a><figcaption>Word perplexity. Lower is better. Wanda and SparseGPT have no reported values in the saved Qwen runs.</figcaption></figure>
+      </div>
+      <p class="muted">These figures describe experimental notebook runs, not a performance guarantee for the packaged API. Select a figure to view it at full size.</p>
+    </section>
+    <section id="quickstart">
+      <p class="kicker">03 / Quickstart</p>
+      <h2>Prune a PyTorch model in place</h2>
+      <p>From the repository root, run <code>python -m pip install .</code>. Supply a model, calibration batches, and a differentiable scalar loss. Pass separate validation batches to check refinement.</p>
+      <pre><code>from higher_order_pruner import HigherOrderPruner, PruneConfig
+
+pruner = HigherOrderPruner(PruneConfig(sparsity=0.5))
+report = pruner.prune(
+    model, calibration_batches, loss_fn,
+    validation_batches=heldout_batches,
+)
+print(report.achieved_sparsity)</code></pre>
+      <p>For the optional Hugging Face adapter, install with <code>python -m pip install ".[hf]"</code>. Sparsity is measured over selected weights; zeroing weights does not by itself speed up dense inference.</p>
+    </section>
+  </main>
+  <footer><a href="#top">Back to top ↑</a></footer>
+</body>
+</html>

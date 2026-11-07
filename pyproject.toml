@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "higher-order-pruner"
+version = "0.1.0"
+description = "Model-agnostic higher-order pruning for PyTorch and Hugging Face models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [{name = "Angshul Majumdar"}]
+dependencies = [
+  "torch>=2.4,<3",
+]
+
+[project.optional-dependencies]
+hf = [
+  "transformers>=4.57,<5",
+  "accelerate>=1.2,<2",
+  "safetensors>=0.5,<1",
+  "huggingface_hub>=0.34,<2",
+]
+checkpoint = ["safetensors>=0.5,<1"]
+test = ["pytest>=8,<10"]
+
+[tool.setuptools.packages.find]
+include = ["higher_order_pruner*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
